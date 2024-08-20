@@ -9,10 +9,6 @@
         :status-icon="true"
         :rules="rules"
       >
-        <el-form-item label="邮箱" prop="email" required>
-          <el-input v-model:model-value="model.email" />
-        </el-form-item>
-
         <el-form-item label="协议" prop="protocol" required>
           <el-select v-model:model-value="model.protocol">
             <el-option label="tcp" value="tcp" />
@@ -36,19 +32,17 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
-import {reactive, ref} from "vue";
+import { reactive, ref } from "vue";
 
 interface FormModel {
-  email: string;
   protocol: "tcp";
   ip: string;
   port: string;
 }
 
 const model = reactive<FormModel>({
-  email: "",
   protocol: "tcp",
   ip: "",
   port: "",
@@ -73,17 +67,6 @@ const validateIp = (rule: any, value: any, callback: any) => {
 };
 
 const rules = reactive<FormRules>({
-  email: [
-    {
-      required: true,
-      message: "请输入邮箱地址",
-      trigger: "blur",
-    },
-    {
-      type: "email",
-      message: "无效的邮箱地址",
-    },
-  ],
   protocol: [
     {
       required: true,
@@ -123,7 +106,29 @@ const handleSubmit = () => {
     return;
   }
 
-  formRef.value.validate((valid) => {});
+  formRef.value.validate(async (valid) => {
+    await submit(model.protocol, model.ip, parseInt(model.port));
+  });
+};
+
+const submit = async (protocol: string, ip: string, port: number) => {
+  const response = await fetch("http://zta.beyondnetwork.net:12358/apply", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    },
+    body: JSON.stringify({
+      protocol,
+      ip,
+      port,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("请求出错", response.status);
+    return;
+  }
+  console.log(response.json());
 };
 </script>
 
