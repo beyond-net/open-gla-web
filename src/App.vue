@@ -1,12 +1,15 @@
 <template>
-  <el-config-provider :locale="zhCn">
+  <el-card style="width: 680px;padding: 20px;">
+    <template #header>
+      <div class="card-header">
+        <h2>免费使用申请</h2>
+      </div>
+    </template>
     <div class="container">
       <el-form
         ref="formRef"
         :model="model"
         label-position="top"
-        style="width: 400px"
-        :status-icon="true"
         :rules="rules"
       >
         <el-form-item label="协议" prop="protocol" required>
@@ -28,7 +31,11 @@
         </el-form-item>
       </el-form>
     </div>
-  </el-config-provider>
+    <template #footer>
+      <span style="color:red"><b>每日免费开放1000个测试名额，先到先得</b></span>
+    </template>
+  </el-card>
+
 </template>
 
 <script lang="ts" setup>
@@ -125,7 +132,11 @@ const submit = async (protocol: string, ip: string, port: number) => {
   });
 
   if (!response.ok) {
-    console.error("请求出错", response.status);
+    if (response.status == 409) {
+      alert("当日免费额度已满，请改日再提交")
+    } else {
+      alert("请求出错: " + response.status);
+    }
     return;
   }
   console.log(response.json());
@@ -133,9 +144,4 @@ const submit = async (protocol: string, ip: string, port: number) => {
 </script>
 
 <style lang="css">
-.container {
-  border: 1px solid gray;
-  padding: 40px;
-  border-radius: 20px;
-}
 </style>
