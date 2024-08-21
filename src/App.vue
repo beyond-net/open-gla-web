@@ -1,17 +1,12 @@
 <template>
-  <el-card style="width: 680px;padding: 20px;">
+  <el-card style="width: 680px; padding: 20px">
     <template #header>
       <div class="card-header">
         <h2>免费使用申请</h2>
       </div>
     </template>
     <div class="container">
-      <el-form
-        ref="formRef"
-        :model="model"
-        label-position="top"
-        :rules="rules"
-      >
+      <el-form ref="formRef" :model="model" label-position="top" :rules="rules">
         <el-form-item label="协议" prop="protocol" required>
           <el-select v-model:model-value="model.protocol">
             <el-option label="tcp" value="tcp" />
@@ -32,22 +27,35 @@
       </el-form>
     </div>
     <template #footer>
-      <span style="color:red"><b>每日免费开放1000个测试名额，先到先得</b></span>
+      <span style="color: red"
+        ><b>每日免费开放1000个测试名额，先到先得</b></span
+      >
     </template>
   </el-card>
-
 </template>
 
 <script lang="ts" setup>
-import type { FormInstance, FormRules } from "element-plus";
-import zhCn from "element-plus/es/locale/lang/zh-cn";
-import { reactive, ref } from "vue";
+import type {FormInstance, FormRules} from "element-plus";
+import {reactive, ref} from "vue";
 
 interface FormModel {
   protocol: "tcp";
   ip: string;
   port: string;
 }
+
+interface ResponseModel {
+  apply_hour: number;
+  created_at: number;
+  ip: string;
+  port: number;
+  protocol: string;
+  public_ip: string;
+  public_port: number;
+  uuid: string;
+}
+
+const result = ref<ResponseModel>();
 
 const model = reactive<FormModel>({
   protocol: "tcp",
@@ -133,15 +141,19 @@ const submit = async (protocol: string, ip: string, port: number) => {
 
   if (!response.ok) {
     if (response.status == 409) {
-      alert("当日免费额度已满，请改日再提交")
+      alert("当日免费额度已满，请改日再提交");
     } else {
       alert("请求出错: " + response.status);
     }
     return;
   }
-  console.log(response.json());
+
+  const data: ResponseModel = await response.json();
+  result.value = data;
+  console.log(data);
+  console.log("访问IP: " + data.public_ip);
+  console.log("访问端口: " + data.public_port);
 };
 </script>
 
-<style lang="css">
-</style>
+<style lang="css"></style>
